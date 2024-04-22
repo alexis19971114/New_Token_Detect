@@ -1,0 +1,24 @@
+{
+  "name": "new_token_detect",
+  "version": "1.0.0",
+  "description": "This is program for detecting new useful tokens",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/alexis19971114/New_Token_Detect.git"
+  },
+  "keywords": [
+    "new",
+    "token",
+    "detect"
+  ],
+  "author": "Alex Ferguson",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexis19971114/New_Token_Detect/issues"
+  },
+  "homepage": "https://github.com/alexis19971114/New_Token_Detect#readme"
+}
