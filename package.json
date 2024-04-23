@@ -1,10 +1,12 @@
 {
   "name": "new_token_detect",
+  "type": "module",
   "version": "1.0.0",
   "description": "This is program for detecting new useful tokens",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --experimental-json-modules index.js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +22,28 @@
   "bugs": {
     "url": "https://github.com/alexis19971114/New_Token_Detect/issues"
   },
-  "homepage": "https://github.com/alexis19971114/New_Token_Detect#readme"
+  "homepage": "https://github.com/alexis19971114/New_Token_Detect#readme",
+  "dependencies": {
+    "@ethereumjs/tx": "^3.4.0",
+    "@flashbots/ethers-provider-bundle": "^0.5.0",
+    "abi-decoder": "^2.4.0",
+    "axios": "^1.2.4",
+    "bnc-sdk": "^4.6.0",
+    "chalk": "^5.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "ethers": "^5.7.2",
+    "express": "^4.18.2",
+    "http": "^0.0.1-security",
+    "module": "^1.2.5",
+    "mongoose": "^6.8.0",
+    "morgan": "^1.10.0",
+    "node-fetch": "^3.3.0",
+    "pino-pretty": "^11.0.0",
+    "socket.io": "^4.5.4",
+    "websocket": "^1.0.34"
+  },
+  "devDependencies": {
+    "eslint": "^8.4.1"
+  }
 }

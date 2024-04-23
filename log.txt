@@ -1,0 +1,38 @@
+[2024-04-22T14:58:29.288Z] We detect new ERC20 token creation {
+  address: '0x925958c9d30bd3fca33ee67f498e9bc5bd6d77ef',
+  name: 'MOMO',
+  symbol: 'MOMO',
+  decimals: 9,
+  owner: '0xB3CA11BA8974BBf3cbeBc884A333489442aD9674',
+  totalSupply: BigNumber { _hex: '0x2386f26fc10000', _isBigNumber: true },
+  tokenCreationHash: '0xf8ffea10ed1f94b5ad6bcb95a704ca799a7dfa07eac469fa43cfcf5047640c29',
+  blockNumber: 19711590,
+  hash: '0xf8ffea10ed1f94b5ad6bcb95a704ca799a7dfa07eac469fa43cfcf5047640c29'
+}
+
+[2024-04-22T14:58:18.343Z] We detect WETH pair create. {
+  address: '0x040e31a5b997204eece6c4fa12b87971866f4235',
+  pair: '0x11373f06401a7257f492b84077d6fa32c748d307',
+  pairToken: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2',
+  hash: '0x67378aa9890aa65481e4d75286d038a31e96d9970637ab2fac68bd757fc93948'
+}
+
+[2024-04-22T17:15:26.660Z]  {
+  _id: new ObjectId("662699bcd02d7e850d743e5d"),
+  address: '0xae6c076024983341a313f2173c8cdb608ebb5bf4',
+  name: 'Aundy',
+  symbol: 'AUNDY',
+  decimals: 9,
+  owner: '0x5b9f0E2a614C06153dcF0Ea3C243311b50aAc965',
+  totalSupply: '420690000000000000000000',
+  tokenCreationHash: '0x08e0e0a28555a7857cd49e2bffb858443099ec8806d9cadfc6ef739dcf8b1fb0',
+  blockNumber: 19708120,
+  contractSourceCode: '',
+  contractABI: '[]',
+  level: 0,
+  createdAt: 2024-04-22T17:09:16.944Z,
+  updatedAt: 2024-04-22T17:09:16.946Z,
+  __v: 0,
+  pair: '0xeff56a81fcbb99e53a13dd1bb0cbb6b61950a06c',
+  pairToken: '0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2'
+}
