@@ -9,6 +9,7 @@ const sniperTxsSchema = new mongoose.Schema(
     txHash: {
       type: String,
       require: true,
+      unique: true,
     },
   },
   {

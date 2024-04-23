@@ -32,7 +32,7 @@ export const getSniperModel = async (sniperTxsDB) => {
       break;
 
       default:
-        toAddress = sniperTx.to()
+        toAddress = sniperTx.to
     }
 
     sniperTxs.push({
@@ -80,7 +80,6 @@ export const getContractInfo = async (req, res) => {
       res.status(200).json({
         success             :     true,
         data                :     tokenInfo,
-        contractCode,
         sniperTxs           :     await getSniperModel(sniperTxsDB)
       });
     } else {

@@ -5,6 +5,7 @@ const newTokensSchema = new mongoose.Schema(
     address: {
       type: String,
       required: true,
+      unique: true,
     },
     name: {
       type: String,

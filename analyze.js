@@ -6,6 +6,7 @@ import IUnicrypt                          from "./library/abi/IUnicrypt.js";
 import IPinkLock                          from "./library/abi/IPinkLock.js";
 import { logSuccess }                     from "./library/logging.js";
 import { match, getBigNumberFromString }  from "./library/utils.js";
+import { getUniv2PairAddress }            from "./library/univ2.js";
 import {
   wssProvider   ,
   IERC20        ,
@@ -33,17 +34,18 @@ abiDecoder.addABI(IPinkLock);
 
 // Handle detect ERC20 token creation
 const detectForContractCreation = async (tx) => {
+  
   const contractAddress = tx.contractAddress;
 
   // Get name, symbol, totalSupply, decimals of the contract. If these things are exist, this contract is token contract.
   let name, symbol, totalSupply, decimals;
-
+  
   try {
     name        = await IERC20.attach(contractAddress).name();
     symbol      = await IERC20.attach(contractAddress).symbol();
     totalSupply = await IERC20.attach(contractAddress).totalSupply();
     decimals    = await IERC20.attach(contractAddress).decimals();
-
+    
     // Check if the contract is NFT: NFT's decimal is ZERO
     if (decimals == 0) return;
 
@@ -57,7 +59,7 @@ const detectForContractCreation = async (tx) => {
         owner = tx.from;
       }
     }
-
+    
     let contractSourceCode = "";
 
     const fetchURL = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=E4DKRHQZPF2RVBXC6G2IBP56PJFFBITYVA`;
@@ -80,7 +82,6 @@ const detectForContractCreation = async (tx) => {
       tokenCreationHash: tx.transactionHash,
       blockNumber: tx.blockNumber,
       hash: tx.transactionHash,
-      contractSourceCode,
     });
 
     const newToken = await newTokenStructure.create({
@@ -136,7 +137,7 @@ const detectPairCreate = async (parameters) => {
         hash:       txHash,
       });
 
-      await newTokenStructure.findOneAndUpdate(
+      let updateToken = await newTokenStructure.findOneAndUpdate(
         {
           address: tokenAddress,
         },
@@ -148,7 +149,7 @@ const detectPairCreate = async (parameters) => {
         {}
       );
 
-      io.emit("newPairCreated", newTokenStructure);
+      io.emit("newPairCreated", updateToken);
     }
   }
 };
@@ -177,7 +178,7 @@ const detectSwapLogs = async (parameters) => {
       }
 
       const tokenCheck = await newTokenStructure.findOne({ pair });
-
+     
       if (tokenCheck == null) continue;
 
       // const sender = decodedLog.events[0].value;
@@ -217,7 +218,6 @@ const detectSwapLogs = async (parameters) => {
         })
 
         io.emit("swapEnabled", tokenCheck);
-        await tokenCheck.save();
       } else {
         tokenCheck.buyCount             = swapDirection == 0 
                                             ? tokenCheck.buyCount + 1  
@@ -234,13 +234,14 @@ const detectSwapLogs = async (parameters) => {
         if (blockNumber === tokenCheck.firstSwapBlockNumber) {
           tokenCheck.firstBlockBuyCount   = tokenCheck.buyCount;
           tokenCheck.firstBlockSellCount  = tokenCheck.sellCount;
-
+  
           await sniperTxsStructure.create({
             address: (match(token0, TOKENS.WETH) ? token1 : token0).toLowerCase(),
             txHash
           })
-
+          
           io.emit("sniperAttack", tokenCheck);
+          console.log("sniperAttack", txHash)
         }
 
         await tokenCheck.save();
@@ -262,7 +263,7 @@ const analyze = async (block) => {
       // Detect for contract creation
       if (tx.to == null && tx.contractAddress != null) {
         // Analyze new contract is created
-        await detectForContractCreation(tx);
+       await detectForContractCreation(tx);
       }
 
       let decodedLogs = [];
@@ -282,20 +283,23 @@ const analyze = async (block) => {
       await detectSwapLogs({
         decodedLogs,
         txHash      : tx.transactionHash,
-        blockNumber : tx.blockNumber,
+        blockNumber : tx.blockNumber
       });
     } catch (e) {
-      console.log("Error:", {tx}, e);
+    //  console.log("Error:", {tx}, e);
     }
   }
 };
 
 export const start = async () => {  
   
-  let isDoneSyncing     = false;
-  const lastBlockNumber = await wssProvider.getBlockNumber();
+  let isDoneSyncing       = false;
+  const lastBlockNumber   = await wssProvider.getBlockNumber();
   
-  for(let blockNumber = lastBlockNumber - 3600 * 24 / 12; ; ++ blockNumber) {
+  let lastestBlockNumber  = lastBlockNumber - 3600 * 2;
+  let curBlockNamber      = 19718805;
+
+  for(let blockNumber = curBlockNamber; ; ++ blockNumber) {
     if(blockNumber > await wssProvider.getBlockNumber()) break;
     await analyze(await wssProvider.getBlockWithTransactions(blockNumber));
   }
@@ -313,7 +317,7 @@ export const start = async () => {
     
     try {
       const block = await wssProvider.getBlockWithTransactions(currentBlock);
-      analyze(block);
+      analyze(block); 
     } catch (e) {
       console.log("Error", e);
     }

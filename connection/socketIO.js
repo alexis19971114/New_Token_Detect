@@ -41,7 +41,11 @@ io.on("connection", async (socket) => {
       name                    :   contract.name,
       symbol                  :   contract.symbol,
       level                   :   contract.level,
+      pair                    :   contract.pair,
+      created_at              :   contract.createdAt,
+      updated_at              :   contract.updatedAt,
     };
+    
     if (contract.buyCount == undefined) {
       tokens.push(tokenInfo)
       continue;
