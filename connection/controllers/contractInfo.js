@@ -49,12 +49,20 @@ export const getSniperModel = async (sniperTxsDB) => {
   return { sniperTxs, BGCount, MaestroCount };
 }
 
-export const getContractInfo = async (req, res) => {
+export const getContractInfo = async (req, res) => {    
   try {
     const address   = req.query.address.toLowerCase();
     const tokenInfo = await newTokenStructure.findOne({ address: address });
 
-    let contractCode;
+    if (tokenInfo == null) {
+      res.status(400).json({
+        success : false,
+        error   : "Nothing matched"
+      })
+      return
+    }
+
+    let contractCode = "";
     
     const fetchURL = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${tokenInfo.address}&apikey=E4DKRHQZPF2RVBXC6G2IBP56PJFFBITYVA`;
     await fetch(fetchURL)
@@ -67,12 +75,12 @@ export const getContractInfo = async (req, res) => {
     });
 
     let sniperTxsDB = await sniperTxsStructure.find({address: address}, {txHash: 1}); 
-
+    
     if (tokenInfo != null) {
       res.status(200).json({
         success             :     true,
         data                :     tokenInfo,
-        contractSourceCode  :     contractCode,
+        contractCode,
         sniperTxs           :     await getSniperModel(sniperTxsDB)
       });
     } else {

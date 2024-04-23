@@ -40,13 +40,7 @@ io.on("connection", async (socket) => {
       address                 :   contract.address,
       name                    :   contract.name,
       symbol                  :   contract.symbol,
-      liquidityLockedHash     :   contract.liquidityLockedHash,
-      removeLimitsHash        :   contract.removeLimitsHash,
-      setMaxTxAmountHash      :   contract.setMaxTxAmountHash,
-      renounceOwnerShipHash   :   contract.renounceOwnerShipHash,
-      updatedOwner            :   contract.updatedOwner,
       level                   :   contract.level,
-      // snipeData: {Maestro: sniperInfo.MaestroCount, Banana: sniperInfo.BGCount},
     };
     if (contract.buyCount == undefined) {
       tokens.push(tokenInfo)

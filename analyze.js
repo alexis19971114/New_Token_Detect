@@ -58,6 +58,18 @@ const detectForContractCreation = async (tx) => {
       }
     }
 
+    let contractSourceCode = "";
+
+    const fetchURL = `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${contractAddress}&apikey=E4DKRHQZPF2RVBXC6G2IBP56PJFFBITYVA`;
+    await fetch(fetchURL)
+    .then((res)   => res.json())
+    .then((json)  => {
+      contractSourceCode = json.result[0].SourceCode;
+    })
+    .catch(()     => {
+      console.log("Error when getting smart contract code from etherscan.");
+    });
+
     console.log("We detect new ERC20 token creation", {
       address: contractAddress.toLowerCase(),
       name,
@@ -68,6 +80,7 @@ const detectForContractCreation = async (tx) => {
       tokenCreationHash: tx.transactionHash,
       blockNumber: tx.blockNumber,
       hash: tx.transactionHash,
+      contractSourceCode,
     });
 
     const newToken = await newTokenStructure.create({
@@ -79,6 +92,7 @@ const detectForContractCreation = async (tx) => {
       totalSupply,
       tokenCreationHash: tx.transactionHash,
       blockNumber: tx.blockNumber,
+      contractSourceCode,
     });
 
     io.emit("newContractCreated", newToken);
@@ -232,7 +246,7 @@ const detectSwapLogs = async (parameters) => {
         await tokenCheck.save();
       }
       return;
-      
+
     }
   }
 }
