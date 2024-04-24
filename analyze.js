@@ -18,7 +18,7 @@ import {
 import newTokenStructure                  from "./models/newTokens.js";
 import sniperTxsStructure                 from "./models/sniperTxs.js";
 
-import { io }                             from "./connection/socketIO.js";
+import { io, getContracts }               from "./connection/socketIO.js";
 
 import { createRequire }                  from "module";
 
@@ -72,6 +72,23 @@ const detectForContractCreation = async (tx) => {
       console.log("Error when getting smart contract code from etherscan.");
     });
 
+    const newToken = await newTokenStructure.create({
+      address: contractAddress.toLowerCase(),
+      name,
+      symbol,
+      decimals,
+      owner: owner.toLowerCase(),
+      totalSupply,
+      tokenCreationHash: tx.transactionHash,
+      blockNumber: tx.blockNumber,
+      contractSourceCode,
+    });
+
+    io.emit("newContractCreated", {
+      token: newToken,
+      contracts: await getContracts()
+    });
+
     console.log("We detect new ERC20 token creation", {
       address: contractAddress.toLowerCase(),
       name,
@@ -83,20 +100,6 @@ const detectForContractCreation = async (tx) => {
       blockNumber: tx.blockNumber,
       hash: tx.transactionHash,
     });
-
-    const newToken = await newTokenStructure.create({
-      address: contractAddress.toLowerCase(),
-      name,
-      symbol,
-      decimals,
-      owner,
-      totalSupply,
-      tokenCreationHash: tx.transactionHash,
-      blockNumber: tx.blockNumber,
-      contractSourceCode,
-    });
-
-    io.emit("newContractCreated", newToken);
   } catch (e) {
     // This contract is not ERC20 token contract.
     return;
@@ -129,14 +132,6 @@ const detectPairCreate = async (parameters) => {
 
       if(tokenCheck == null) continue;
 
-      console.log("We detect WETH pair create.", {
-        address:    tokenAddress,
-        pair:       pair.toLowerCase(),
-        pairToken:  TOKENS.WETH,
-        PairBlock:  blockNumber,
-        hash:       txHash,
-      });
-
       let updateToken = await newTokenStructure.findOneAndUpdate(
         {
           address: tokenAddress,
@@ -149,7 +144,19 @@ const detectPairCreate = async (parameters) => {
         {}
       );
 
-      io.emit("newPairCreated", updateToken);
+      io.emit("newPairCreated", {
+        token: updateToken,
+        contracts: await getContracts()
+      });
+
+      console.log("We detect WETH pair create.", {
+        address:    tokenAddress,
+        pair:       pair.toLowerCase(),
+        pairToken:  TOKENS.WETH,
+        PairBlock:  blockNumber,
+        hash:       txHash,
+      });
+
     }
   }
 };
@@ -217,7 +224,10 @@ const detectSwapLogs = async (parameters) => {
           txHash
         })
 
-        io.emit("swapEnabled", tokenCheck);
+        io.emit("swapEnabled", {
+          token: tokenCheck,
+          contracts: await getContracts()
+        });
       } else {
         tokenCheck.buyCount             = swapDirection == 0 
                                             ? tokenCheck.buyCount + 1  
@@ -234,13 +244,16 @@ const detectSwapLogs = async (parameters) => {
         if (blockNumber === tokenCheck.firstSwapBlockNumber) {
           tokenCheck.firstBlockBuyCount   = tokenCheck.buyCount;
           tokenCheck.firstBlockSellCount  = tokenCheck.sellCount;
-  
+         
           await sniperTxsStructure.create({
             address: (match(token0, TOKENS.WETH) ? token1 : token0).toLowerCase(),
             txHash
           })
           
-          io.emit("sniperAttack", tokenCheck);
+          io.emit("sniperAttack", {
+            token: tokenCheck,
+            contracts: await getContracts()
+          });
           console.log("sniperAttack", txHash)
         }
 
@@ -309,7 +322,6 @@ export const start = async () => {
   let prevoiusBlock = 0;
 
   wssProvider.on("block", async (currentBlock) => {
-
     if (prevoiusBlock >= currentBlock) return;
     if (!isDoneSyncing) return;
     

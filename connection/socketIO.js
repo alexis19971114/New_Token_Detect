@@ -31,9 +31,24 @@ export const io = new Server(httpServer, {
 io.on("connection", async (socket) => {
   console.log("client connected: ", socket.id);
 
-  let contracts = await newTokenStructure.find().sort({createdAt: -1});
-  const tokens  = [];
+  const tokens  = await getContracts();
 
+  io.to(socket.id).emit("clientConnected", {
+    contracts: tokens,
+    time: new Date()
+  });
+
+  socket.on("disconnect", (reason) => {
+    console.log(`Socket Disconnect: ${reason}`);
+  });
+});
+
+app.use("/api/v1/contractInfo", contractInfoRouter);
+
+export const getContracts = async () => {
+  const tokens  = [];
+  let contracts = await newTokenStructure.find().sort({createdAt: -1});
+  
   for (const contract of contracts) {
     if (contract.pair == undefined) continue;
     let tokenInfo = {
@@ -44,6 +59,8 @@ io.on("connection", async (socket) => {
       pair                    :   contract.pair,
       created_at              :   contract.createdAt,
       updated_at              :   contract.updatedAt,
+      owner                   :   contract.owner,
+      blockNumber             :   contract.blockNumber
     };
     
     if (contract.buyCount == undefined) {
@@ -61,15 +78,5 @@ io.on("connection", async (socket) => {
     }
     tokens.push(tokenInfo)
   }
-
-  io.emit("clientConnected", {
-    contracts: tokens
-  });
-
-  socket.on("disconnect", (reason) => {
-    console.log(`Socket Disconnect: ${reason}`);
-  });
-});
-
-app.use("/api/v1/contractInfo", contractInfoRouter);
-
+  return tokens;
+}

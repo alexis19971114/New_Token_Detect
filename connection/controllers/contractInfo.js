@@ -51,6 +51,7 @@ export const getSniperModel = async (sniperTxsDB) => {
 
 export const getContractInfo = async (req, res) => {    
   try {
+    console.log(req.query)
     const address   = req.query.address.toLowerCase();
     const tokenInfo = await newTokenStructure.findOne({ address: address });
 
