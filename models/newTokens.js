@@ -67,6 +67,11 @@ const newTokensSchema = new mongoose.Schema(
     firstBlockSellCount: {
       type: Number,
     },
+    nonceCount: {
+      type: Number,
+      required: true,
+      default: 0
+    },
   },
   {
     timestamps: true,

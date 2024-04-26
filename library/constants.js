@@ -43,3 +43,5 @@ export const IERC20 = new ethers.Contract(
   IERC20ABI,
   wssProvider
 )
+
+export const NONCE_SIZE_LIMIT = 5;

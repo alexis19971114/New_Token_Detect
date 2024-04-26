@@ -47,7 +47,7 @@ app.use("/api/v1/contractInfo", contractInfoRouter);
 
 export const getContracts = async () => {
   const tokens  = [];
-  let contracts = await newTokenStructure.find().sort({createdAt: -1});
+  let contracts = await newTokenStructure.find().sort({createdAt: -1}).limit(300);
   
   for (const contract of contracts) {
     if (contract.pair == undefined) continue;
@@ -57,10 +57,11 @@ export const getContracts = async () => {
       symbol                  :   contract.symbol,
       level                   :   contract.level,
       pair                    :   contract.pair,
-      created_at              :   contract.createdAt,
-      updated_at              :   contract.updatedAt,
+      createdAt               :   contract.createdAt,
+      updatedAt               :   contract.updatedAt,
       owner                   :   contract.owner,
-      blockNumber             :   contract.blockNumber
+      blockNumber             :   contract.blockNumber,
+      nonceCount              :   contract.nonceCount,
     };
     
     if (contract.buyCount == undefined) {

@@ -21,6 +21,7 @@ import sniperTxsStructure                 from "./models/sniperTxs.js";
 import { io, getContracts }               from "./connection/socketIO.js";
 
 import { createRequire }                  from "module";
+import { NONCE_SIZE_LIMIT }               from "./library/constants.js";
 
 const require     = createRequire(import.meta.url);
 const abiDecoder  = require("abi-decoder");
@@ -194,7 +195,6 @@ const detectSwapLogs = async (parameters) => {
       const amount0Out  = decodedLog.events[3].value;
       const amount1Out  = decodedLog.events[4].value;
       // const to = decodedLog.events[5].value;
-
       let swapDirection; // 0: WETH -> TOKEN(BUY), 1: TOKEN -> WETH(SELL)
       if (amount1Out == "0") {
         swapDirection = match(token0, TOKENS.WETH) ? 1 : 0;
@@ -209,6 +209,9 @@ const detectSwapLogs = async (parameters) => {
         tradeTokenAmount = amount0In != "0" ? amount0In : amount1In;
       }
 
+      const sniperTx = await wssProvider.getTransaction(txHash);
+      const nonce = sniperTx.nonce
+      
       if (tokenCheck.buyCount == undefined) {
         tokenCheck.buyCount             = swapDirection == 0 ? 1 : 0;
         tokenCheck.sellCount            = swapDirection == 1 ? 1 : 0;
@@ -217,11 +220,15 @@ const detectSwapLogs = async (parameters) => {
         tokenCheck.maxTradeTokenAmount  = tradeTokenAmount;
         tokenCheck.firstSwapBlockNumber = blockNumber;
         
+        if(nonce <= NONCE_SIZE_LIMIT) {
+          tokenCheck.nonceCount ++;
+        }
+        
         await tokenCheck.save();
-
+        
         await sniperTxsStructure.create({
           address: (match(token0, TOKENS.WETH) ? token1 : token0).toLowerCase(),
-          txHash
+          txHash,
         })
 
         io.emit("swapEnabled", {
@@ -247,8 +254,13 @@ const detectSwapLogs = async (parameters) => {
          
           await sniperTxsStructure.create({
             address: (match(token0, TOKENS.WETH) ? token1 : token0).toLowerCase(),
-            txHash
+            txHash,
           })
+          if(nonce <= NONCE_SIZE_LIMIT) {
+            tokenCheck.nonceCount ++;
+          }
+
+          await tokenCheck.save();
           
           io.emit("sniperAttack", {
             token: tokenCheck,
@@ -256,8 +268,9 @@ const detectSwapLogs = async (parameters) => {
           });
           console.log("sniperAttack", txHash)
         }
-
-        await tokenCheck.save();
+        else {
+          await tokenCheck.save();
+        }  
       }
       return;
 
@@ -310,7 +323,7 @@ export const start = async () => {
   const lastBlockNumber   = await wssProvider.getBlockNumber();
   
   let lastestBlockNumber  = lastBlockNumber - 3600 * 2;
-  let curBlockNamber      = 19718805;
+  let curBlockNamber      = 19728800;
 
   for(let blockNumber = curBlockNamber; ; ++ blockNumber) {
     if(blockNumber > await wssProvider.getBlockNumber()) break;
